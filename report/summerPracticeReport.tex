@@ -11,6 +11,7 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{algpseudocode}
+\usepackage{hyperref}
 
 
 
@@ -381,242 +382,611 @@
 	
 	https://github.com/SaElmas/low\_rank\_approximations
 	
+	\texttt{Julia-lang} packages that has been used in this work.
 	\begin{lstlisting}
-		using LinearAlgebra
-		using Random
-		using Printf
-		using Plots
-		using Statistics
-		using Distributions
-		using SparseArrays
-		using MatrixMarket
-		
-		function generate_sampling(n,s,p)
-		# n : number of columns
-		# s : size of sampling
-		# p : probabilities for each column
-		
-		# generate an idendity matrix nxn
-		# select random s columns from this
-		eye = Matrix(1.0I, n,n);
-		total = 0;
-		if p isa Matrix{Float64}
-			for i = 1:n
-			eye[i,i] = 1 / sqrt(p[i]*s);
-			end
-		else
-			for i = 1:n
-				total += norm(A[:,i])*norm(B[i,:]);
-			end
-			for i= 1:n
-				pni = norm(A[:,i])*norm(B[i,:]) / total;
-				eye[i,i] = 1 / sqrt(pni*s)
-			end
-		end
-		
-		rng = MersenneTwister();
-		perm = randperm(rng,s);
-		S = eye[:,perm];
-		return S;   
-		end
-		
-		function basicMatrixMulitplication(A, B, c, P)
-		# A mxn
-		# B nxp
-		# c sampling number c <= n
-		# P probabilities contains n float. 0 < pi < 1 and sum(pi) = 1;
-		_,n = size(A);
-		S = generate_sampling(n,c,P);
-		A * S , S' * B;
-		end
-		
-		# Algorithm 4.1 Randomized Range Finder
-		# Input A(mxn) matrix, integer l
-		# Output Q(mxl) matrix, approximates the range of A
-		function rrf(A, l)
-		rng = MersenneTwister()
-		_,n = size(A);
-		Om = randn(rng, Float64, (n,l))
-		Y = A*Om
-		Q_,_ = qr(Y)
-		Q = Matrix(Q_)
-		return Q
-		end
-		
-		# Algorithm 4.2 Adaptive Randomized Range Finder
-		# Input A(mxn) matrix, tolerance eps, integer r as oversampling parameter
-		# Output Q(mxl) orthonormal with tolerance holds with probability 1-min{m,n}10^-r
-		function arrf(A,eps,r,plot_step)
-		# plot_step is used to generat errors and iterations vectors
-		# if plot_step is 0 then no vectors are empty
-		# for a positive value of plot_step the value is used for iteration step.
-		(m,n) = size(A);
-		W = zeros(n,r)
-		Y = zeros(m,r)
-		Q = zeros(m,1)
-		j = 0
-		max_err=0
-		for i=1:r
-		w = randn(n,1)
-		W[:,i] = w 
-		Y[:,i] = A*w
-		end
-		
-		for i=1:r
-		ny = norm(Y[:,i])
-		if ny > eps/(10*sqrt(2/pi))
-		max_err = ny
-		end
-		end
-		iteration_step=0;
-		iterations = []
-		errors = []
-		
-		while(max_err > eps)
-		iteration_step +=1;
-		if plot_step > 0 
-		if iteration_step % plot_step == 0
-		append!(iterations, iteration_step)
-		append!(errors,max_err)
-		end
-		end
-		j += 1
-		yj = (1.0I-Q*Q')*Y[:,j]
-		qj = yj / norm(yj);
-		Y[:,j] = yj;
-		if j==1
-		Q[:,j] = qj
-		else
-		Q = cat(Q,qj, dims=2)
-		end
-		wjr = randn(n,1)
-		yjr = (1.0I - Q*Q')*(A*wjr)
-		Y = cat(Y,yjr,dims=2)
-		Y[:,j+r] = yjr
-		for i = j+1:j+r-1
-		yi = Y[:,i]
-		Y[:,i] = yi - (qj'*yi)*qj
-		end
-		max_err = 0
-		for i= j+1:j+r-1
-		ny = norm(Y[:,i])
-		if ny > eps/(10*sqrt(2/pi))
-		max_err = ny
-		end
-		end
-		end
-		return Q,iterations,errors
-		end    
-		
-		# Algorithm 4.3 Randomized Power Iteration
-		# Input A(mxn) matrix, integer l, power q 
-		# Output Q(mxl) matrix, approximates the range of A
-		function rpi(A, l, q)
-		rng = MersenneTwister()
-		_,n = size(A)
-		Om = randn(rng, Float64, (n,l))
-		Y = (A*A')^q*A*Om
-		Q_,_ = qr(Y)
-		Q = Matrix(Q_)
-		return Q
-		end
-		
-		# Algorithm 4.4 Randomized Subspace Iteration
-		# Input A(mxn) matrix, integer l, power q 
-		# Output Q(mxl) matrix, approximates the range of A
-		function rsi(A, l, q)
-		rng = MersenneTwister()
-		_,n = size(A)
-		Om = randn(rng, Float64, (n,l))
-		Y = A*Om
-		Q = qr(Y)
-		for i = 1:q
-		@show size(A)
-		@show size(Q)
-		Y = A*Q
-		Q= qr(Y)
-		end
-		return Q
-		end
-		
-		# Algorithm 4.5 Fast Randomized Range Finder
-		# Input A(mxn) matrix, integer l
-		# Output Q(mxl) matrix, approximates the range of A
-		function frrf(A,l)
-		m,n = size(A)
-		D = rucm(n);
-		F = dftg(n);
-		R = Matrix(1.0I,n,l)[:,shuffle(1:end)]
-		Om = sqrt(n/l)*D*F*R
-		Y = A*Om
-		q,r = qr(Y)
-		Q = Matrix(q)
-		return Q
-		end
-		
-		# Algorithm 5.1 Direct SVD
-		# Matrix A(mxn), Q(mxk) matrices with
-		# with |A-QQ*A| < epsilon
-		# Matrices U,S,V, U,V are orthonormal, S nonnegative diagonal matrices
-		
-		function direct_svd(A,Q)
-		B = Q'*A
-		Uh,S,V = svd(B)
-		U = Q*Uh
-		return Q,S,V
-		end
-		
-		# Uniform Discrete Fourier Transform Generator
-		# Input integer n
-		# Output F(nxn) complex matrix
-		function dftg(n)
-		F = ones(ComplexF64,n,n) 
-		for i=1:n
-		for j=1:n
-		F[i,j] = n^(-0.5)*exp(-2*pi*(i-1)*(j-1)/n)
-		end
-		end
-		return F
-		end
-		
-		# Random Complex matrix whose entries are uniformly distributed 
-		# on unit circle.
-		# Random n real numbers in [-pi, pi] that is uniformly distributed chosen
-		# those will be considered as angles of complex numbers on unit circle.
-		function rucm(n)
-		rng = MersenneTwister(1234)
-		angles = rand(Uniform(-pi,pi), n,n)
-		D = ones(ComplexF64, n,n)
-		for i = 1:n
-		for j = 1:n
-		D[i,j] = exp(angles[i,j]im)
-		end
-		end
-		return D
-		end
-		
-		
-		
-		# Gram-Schmidt orthornormalization
-		function gso(A)
-		m,n = size(A)
-		Q = zeros(m,n)
-		v1 = A[:,1]
-		Q[:,1] = v1 / norm(v1);
-		for k = 2:n
-		w = A[:,k]
-		v = w
-		for j = 1:k-1
-		vj = Q[:,j]
-		v -= (w'*vj)*vj
-		end
-		Q[:,k] = v / norm(v)
-		end
-		return Q;
-		end
-		
+		using LinearAlgebra 	# Basic linear algebra functions such as norm matrix multp.
+		using Random 			# For random number generation in various distributions
+		using Printf			# For formatted C like console output.
+		using Plots				# Basic plotting utilities
+		using Statistics		# To utilize statistical tools.
+		using Distributions		# For various probability distributions
+		using SparseArrays		# For sparse matrix methods and spare to dense convertions
+		using MatrixMarket		# To read and write Matrix Market format from/to a file.
 	\end{lstlisting}
+	\begin{lstlisting}	
+
+	# Algorithm 4.1 Randomized Range Finder
+	# Input A(mxn) matrix, integer l
+	# Output Q(mxl) matrix, approximates the range of A
+	function rrf(A, l)
+	    rng = MersenneTwister()
+	    _,n = size(A);
+	    Om = randn(rng, Float64, (n,l))
+	    Y = A*Om
+	    Q_,_ = qr(Y)
+	    Q = Matrix(Q_)
+	    return Q
+	end
 	
+	# Algorithm 4.2 Adaptive Randomized Range Finder
+	# Input A(mxn) matrix, tolerance eps, integer r as oversampling parameter
+	# Output Q(mxl) orthonormal with tolerance holds with probability 1-min{m,n}10^-r
+	function arrf(A,eps,r,plot_step)
+	    # plot_step is used to generat errors and iterations vectors
+	    # if plot_step is 0 then no vectors are empty
+	    # for a positive value of plot_step the value is used for iteration step.
+	    (m,n) = size(A);
+	    W = zeros(n,r)
+	    Y = zeros(m,r)
+	    Q = zeros(m,1)
+	    j = 0
+	    max_err=0
+	    for i=1:r
+	        w = randn(n,1)
+	        W[:,i] = w 
+	        Y[:,i] = A*w
+	    end
+	
+	    for i=1:r
+	        ny = norm(Y[:,i])
+	        if ny > eps/(10*sqrt(2/pi))
+	            max_err = ny
+	        end
+	    end
+	    iteration_step=0;
+	    iterations = []
+	    errors = []
+	
+	    while(max_err > eps)
+	        iteration_step +=1;
+	        if plot_step > 0 
+	            if iteration_step % plot_step == 0
+	                append!(iterations, iteration_step)
+	                append!(errors,max_err)
+	            end
+	        end
+	        j += 1
+	        yj = (1.0I-Q*Q')*Y[:,j]
+	        qj = yj / norm(yj);
+	        Y[:,j] = yj;
+	        if j==1
+	            Q[:,j] = qj
+	        else
+	            Q = cat(Q,qj, dims=2)
+	        end
+	        wjr = randn(n,1)
+	        yjr = (1.0I - Q*Q')*(A*wjr)
+	        Y = cat(Y,yjr,dims=2)
+	        Y[:,j+r] = yjr
+	        for i = j+1:j+r-1
+	            yi = Y[:,i]
+	            Y[:,i] = yi - (qj'*yi)*qj
+	        end
+	        max_err = 0
+	        for i= j+1:j+r-1
+	            ny = norm(Y[:,i])
+	            if ny > eps/(10*sqrt(2/pi))
+	                max_err = ny
+	            end
+	        end
+	    end
+	    return Q,iterations,errors
+	end    
+	
+	# Algorithm 4.3 Randomized Power Iteration
+	# Input A(mxn) matrix, integer l, power q 
+	# Output Q(mxl) matrix, approximates the range of A
+	function rpi(A, l, q)
+	    rng = MersenneTwister()
+	    _,n = size(A)
+	    Om = randn(rng, Float64, (n,l))
+	    Y = (A*A')^q*A*Om
+	    Q_,_ = qr(Y)
+	    Q = Matrix(Q_)
+	    return Q
+	end
+	
+	# Algorithm 4.4 Randomized Subspace Iteration
+	# Input A(mxn) matrix, integer l, power q 
+	# Output Q(mxl) matrix, approximates the range of A
+	function rsi(A, l, q)
+	    rng = MersenneTwister()
+	    _,n = size(A)
+	    Om = randn(rng, Float64, (n,l))
+	    Y = A*Om
+	    Q = qr(Y)
+	    for i = 1:q
+	        @show size(A)
+	        @show size(Q)
+	        Y = A*Q
+	        Q= qr(Y)
+	    end
+	    return Q
+	end
+	
+	# Algorithm 4.5 Fast Randomized Range Finder
+	# Input A(mxn) matrix, integer l
+	# Output Q(mxl) matrix, approximates the range of A
+	function frrf(A,l)
+	    m,n = size(A)
+	    D = rucm(n);
+	    F = dftg(n);
+	    R = Matrix(1.0I,n,l)[:,shuffle(1:end)]
+	    Om = sqrt(n/l)*D*F*R
+	    Y = A*Om
+	    q,r = qr(Y)
+	    Q = Matrix(q)
+	    return Q
+	end
+	
+	# Algorithm 5.1 Direct SVD
+	# Matrix A(mxn), Q(mxk) matrices with
+	    # with |A-QQ*A| < epsilon
+	# Matrices U,S,V, U,V are orthonormal, S nonnegative diagonal matrices
+	
+	function direct_svd(A,Q)
+	    B = Q'*A
+	    Uh,S,V = svd(B)
+	    U = Q*Uh
+	    return Q,S,V
+	end
+	
+	# Uniform Discrete Fourier Transform Generator
+	# Input integer n
+	# Output F(nxn) complex matrix
+	function dftg(n)
+	    F = ones(ComplexF64,n,n) 
+	    for i=1:n
+	        for j=1:n
+	        F[i,j] = n^(-0.5)*exp(-2*pi*(i-1)*(j-1)/n)
+	        end
+	    end
+	    return F
+	end
+	
+	# Random Complex matrix whose entries are uniformly distributed 
+	# on unit circle.
+	# Random n real numbers in [-pi, pi] that is uniformly distributed chosen
+	# those will be considered as angles of complex numbers on unit circle.
+	function rucm(n)
+	    rng = MersenneTwister(1234)
+	    angles = rand(Uniform(-pi,pi), n,n)
+	    D = ones(ComplexF64, n,n)
+	    for i = 1:n
+	        for j = 1:n
+	            D[i,j] = exp(angles[i,j]im)
+	        end
+	    end
+	    return D
+	end
+	\end{lstlisting}
+
+	\subsection{Testing Phase}
+	In this section various results of the applications of algorithms that have been studied are presented.
+
+	During the testing phase below listed matrices have bee used in comparison:
+	\begin{enumerate}
+	\item A random real sparse matrix with dimension 1000x500.
+	\item pde2961.mtx from matrix market with following properties.
+		\begin{itemize}
+			\item 2961 x 2961 with 14585 entries.
+			\item Rank 2961
+			\item Frobenius norm: $2.2\cdot 10^2$
+			\item Spectral norm: $10$
+			\item Full specification and the matrix in .mtx format is \href{https://math.nist.gov/MatrixMarket/data/NEP/matpde/pde2961.html}{here}.
+		\end{itemize}
+	\item eris1176.mtx from matrix market with following properties
+		\begin{itemize}
+			\item 1176x1176 with 9864 entries
+			\item Rank 774
+			\item Frobenius norm: $1.1 \times 10^{11}$
+			\item Spectral norm : $\times 10^{10}$
+			\item Full specification and the matrix in .mtx format is \href{https://math.nist.gov/MatrixMarket/data/Harwell-Boeing/smtape/eris1176.html}{here}.
+		\end{itemize}
+	\item lns\_511.mtx from matrix market with following properties
+		\begin{itemize}
+			\item 511x511 with 2796 entries
+			\item Rank 391
+			\item Frobenius norm: $1.1 \times 10^{11}$
+			\item Spectral norm : $\times 10^{10}$
+			\item Full specification and the matrix in .mtx format is \href{https://math.nist.gov/MatrixMarket/data/Harwell-Boeing/lns/lns__511.html}{here}.
+		\end{itemize}
+	\subsubsection{Test of Algorithm 4.1}
+	The algorithm described on design section and implemented on implementation section will be tested with the following script for all the above four matrices and relevant plots can be seen below.
+	
+	The return matrix of the algorithm $Q$ approximates the given matrix $A$. As the sampling parameter $k$ approaches the rank of the test matrix error goes to zero as expected. The error is in operator norm.
+	\end{enumerate} 
+
+	\begin{lstlisting}
+	A = sprand(1000,500,0.004) # generates a random real sparse matrix (1000x500) and the dencity = 0.004
+	mmwrite("data/random_sparse.mtx", A)
+	ra = rank(A)
+	xs = collect(50:10:ra)
+	if xs[end] != ra
+  		xs = [xs ; ra]
+	end
+	er = zeros(size(xs))
+	index = 1the
+	for i in xs 
+	  Q = rrf(A,i)
+	  er[index] = opnorm((1.0I - Q*Q')*A)
+	  index += 1
+	end
+	plot(xs, er, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="Random Sparse Matrix")
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.1_1.png}
+	
+	\begin{lstlisting}
+	A = mmread("data/pde2961.mtx")
+	ra = 2961
+	xs = collect(100:200:ra)
+	if xs[end] != ra
+	    xs = [xs ; ra]
+	end
+	er = zeros(size(xs))
+	index = 1
+	for i in xs 
+	    Q = rrf(A,i)
+	    er[index] = opnorm((1.0I - Q*Q')*A)
+	    index += 1
+	end
+	plot(xs, er, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="pde2961")
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.1_2.png}
+
+	\begin{lstlisting}
+	A = mmread("data/eris1176.mtx")
+	ra = 774
+	xs = collect(74:20:ra)
+	if xs[end] != ra
+	    xs = [xs ; ra]
+	end
+	er = zeros(size(xs))
+	index = 1
+	for i in xs 
+	    Q = rrf(A,i)
+	    er[index] = opnorm((1.0I - Q*Q')*A)
+	    index += 1
+	end
+	plot(xs, er, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="eris1176")
+	\end{lstlisting}
+
+	\includegraphics[scale=0.5]{images/4.1_3.png}
+	\begin{lstlisting}
+	A = mmread("data/lns__511.mtx")
+	ra = 391
+	xs = collect(41:10:ra)
+	if xs[end] != ra
+	    xs = [xs ; ra]
+	end
+	er = zeros(size(xs))
+	index = 1
+	for i in xs 
+	    Q = rrf(A,i)
+	    er[index] = opnorm((1.0I - Q*Q')*A)
+	    index += 1
+	end
+	plot(xs, er, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="lns__511")
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.1_4.png}
+
+	\subsubsection{Test of Algorithm 4.2}
+	As detailed in the design and implementation phase algorithm 4.2 returns a matrix $Q$ that approximates the given matrix $A$ up to the error value provided. Below for each test matrix a plot showing that error vs iteration value until algorithm hits the desired error.
+	
+	\begin{lstlisting}
+	A = mmread("data/random_sparse.mtx")
+	Q,iterations, errors = arrf(A,0.1, 10, 20);
+	mmwrite("data/4.2_random_sparse_output.mtx",sparse(Q))
+	plot(iterations, errors, xaxis=("iteration"), yaxis="error", line = (0.5, 4, :blue), title="random_sparse\niteratin vs error")
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.2_1.png}
+
+	\begin{lstlisting}
+	A = mmread("data/pde2961.mtx")
+	Q,iterations,errors= arrf(A,0.1, 10, 100);
+	mmwrite("data/4.2_pde2961_output.mtx",sparse(Q))
+	plot(iterations, errors, xaxis=("iteration"), yaxis="error", line = (0.5, 4, :blue), title="pde2961\niteratin vs error")
+	errors = readdlm("data/errors_4.2.1.txt", '\t', Float64, '\n')
+	iterations = readdlm("data/iterations_4.2.1.txt", '\t', Int, '\n')
+	plot(iterations, errors, xaxis=("iteration"), yaxis="error", line = (0.5, 4, :blue), title="pde2961\niteratin vs error")
+
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.2_2.png}
+	\begin{lstlisting}
+	A = mmread("data/eris1176.mtx");
+	Q,iterations, errors = arrf(A,0.1,10,20);
+	mmwrite("data/4.2_eris1176_output.mtx", sparse(Q))
+	plot(iterations, errors, xaxis=("iteration"), yaxis="error", line = (0.5, 4, :blue), title="eris1176\niteratin vs error")
+
+
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.2_3.png}
+	\begin{lstlisting}
+	A = mmread("data/lns__511.mtx");
+	Q,iterations, errors = arrf(A,1,10,10);
+	mmwrite("data/4.2_lns__511_output.mtx", sparse(Q))
+	plot(iterations, errors, xaxis=("iteration"), yaxis="error", line = (0.5, 4, :blue), title="lns__511\niteratin vs error")
+
+
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.2_4.png}
+
+	\subsubsection{Test of Algorithm 4.3}
+	On this algorithm randomized sampling is applied to the matrix $B = (AA^*)^qA$ instead of $A$. B has same left and right singular vectors ($U$ and $V$) with $A$ but singular values are scaled up and down ($\sigma_j(B) = \sigma_j(A)^{2q+1}$). Hence we expect a quicker range finder algorithm by this change.
+
+	As expected while $q$ is equal zero algorithm works as like algorithm 4.1.
+
+	\begin{lstlisting}
+	A = mmread("data/random_sparse.mtx")
+	ra = rank(A)
+	xs = collect(50:10:ra)
+	if xs[end] != ra
+	    xs = [xs ; ra]
+	end
+	er0 = []
+	er1 = []
+	er3 = []
+	er5 = []
+	for i in xs 
+	    Q0 = rpi(A,i,0)
+	    append!(er0,opnorm((1.0I - Q0*Q0')*A))
+	end
+	plot(xs, er0, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="random_sparse\nl-error", label="q=0")
+	
+	for i in xs 
+	        Q1 = rpi(A,i,1)
+	        append!(er1,opnorm((1.0I - Q1*Q1')*A))
+	end
+	plot!(xs, er1, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :yellow), label="q=1")
+	
+	for i in xs 
+	    Q3 = rpi(A,i,1)
+	    append!(er3,opnorm((1.0I - Q3*Q3')*A))
+	end
+	plot!(xs, er3, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :red),label="q=3")
+	
+	for i in xs 
+	    Q5 = rpi(A,i,1)
+	    append!(er5,opnorm((1.0I - Q5*Q5')*A))
+	end
+	plot!(xs, er5, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :green), label="q=5")
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.3_1.png}
+
+	\begin{lstlisting}
+	A = mmread("data/pde2961.mtx")
+	ra = 2961
+	xs = collect(100:200:ra)
+	if xs[end] != ra
+	    xs = [xs ; ra]
+	end
+	er0 = []
+	er1 = []
+	er3 = []
+	er5 = []
+	for i in xs 
+	    Q0 = rpi(A,i,0)
+	    append!(er0,opnorm((1.0I - Q0*Q0')*A))
+	end
+	plot(xs, er0, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="pde2961\nl-error", label="q=0")
+	
+	for i in xs 
+	        Q1 = rpi(A,i,1)
+	        append!(er1,opnorm((1.0I - Q1*Q1')*A))
+	end
+	plot!(xs, er1, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :yellow), label="q=1")
+	
+	for i in xs 
+	    Q3 = rpi(A,i,1)
+	    append!(er3,opnorm((1.0I - Q3*Q3')*A))
+	end
+	plot!(xs, er3, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :red),label="q=3")
+	
+	for i in xs 
+	    Q5 = rpi(A,i,1)
+	    append!(er5,opnorm((1.0I - Q5*Q5')*A))
+	end
+	plot!(xs, er5, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :green), label="q=5")
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.3_2.png}
+	\begin{lstlisting}
+	A = mmread("data/eris1176.mtx")
+	ra = 774
+	xs = collect(74:20:ra)
+	if xs[end] != ra
+	    xs = [xs ; ra]
+	end
+	er0 = []
+	er1 = []
+	er3 = []
+	er5 = []
+	for i in xs 
+	    Q0 = rpi(A,i,0)
+	    append!(er0,opnorm((1.0I - Q0*Q0')*A))
+	end
+	plot(xs, er0, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="eris1176\nl-error", label="q=0")
+	
+	for i in xs 
+	        Q1 = rpi(A,i,1)
+	        append!(er1,opnorm((1.0I - Q1*Q1')*A))
+	end
+	plot!(xs, er1, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :yellow), label="q=1")
+	
+	for i in xs 
+	    Q3 = rpi(A,i,1)
+	    append!(er3,opnorm((1.0I - Q3*Q3')*A))
+	end
+	plot!(xs, er3, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :red),label="q=3")
+	
+	for i in xs 
+	    Q5 = rpi(A,i,1)
+	    append!(er5,opnorm((1.0I - Q5*Q5')*A))
+	end
+	plot!(xs, er5, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :green), label="q=5")
+	\end{lstlisting}
+
+	\includegraphics[scale=0.5]{images/4.3_3.png}
+	\begin{lstlisting}
+	A = mmread("data/lns__511.mtx")
+	ra = 391
+	xs = collect(41:10:ra)
+	if xs[end] != ra
+	    xs = [xs ; ra]
+	end
+	er0 = []
+	er1 = []
+	er3 = []
+	er5 = []
+	for i in xs 
+	    Q0 = rpi(A,i,0)
+	    append!(er0,opnorm((1.0I - Q0*Q0')*A))
+	end
+	plot(xs, er0, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="lns__511\nl-error", label="q=0")
+	
+	for i in xs 
+	        Q1 = rpi(A,i,1)
+	        append!(er1,opnorm((1.0I - Q1*Q1')*A))
+	end
+	plot!(xs, er1, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :yellow), label="q=1")
+	
+	for i in xs 
+	    Q3 = rpi(A,i,1)
+	    append!(er3,opnorm((1.0I - Q3*Q3')*A))
+	end
+	plot!(xs, er3, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :red),label="q=3")
+	
+	for i in xs 
+	    Q5 = rpi(A,i,1)
+	    append!(er5,opnorm((1.0I - Q5*Q5')*A))
+	end
+	plot!(xs, er5, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :green), label="q=5")
+
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.3_4.png}
+
+	\subsubsection{Algorithm 4.5}
+	In this section randomized range finder algorithm 4.1 is presented in comparison with fast randomized range finding algorithm for all the four test matrices.
+
+	\begin{lstlisting}
+	A = mmread("data/random_sparse.mtx")
+	ra = rank(A)
+	xs = collect(50:10:ra)
+	if xs[end] != ra
+	    xs = [xs ; ra]
+	end
+	er = zeros(size(xs))
+	index = 1
+	for i in xs 
+	    Q = frrf(A,i)
+	    er[index] = opnorm((1.0I - Q*Q')*A)
+	    index += 1
+	end
+	
+	p1 = plot(xs, er, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="Random Matrix\nFRRF\nl-error")
+	
+	er = zeros(size(xs))
+	index = 1
+	for i in xs 
+	    Q = rrf(A,i)
+	    er[index] = opnorm((1.0I - Q*Q')*A)
+	    index += 1
+	end
+	p2 = plot(xs, er, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="Random Matrix\nRRF\nl-error")
+	
+	plot!(p1,p2)
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.5_1.png}
+
+	\begin{lstlisting}
+	A = mmread("data/pde2961.mtx")
+	# @show rank(A) yields rank of A is 2961
+	ra = 2961
+	xs = collect(100:200:ra)
+	if xs[end] != ra
+	    xs = [xs ; ra]
+	end
+	er = zeros(size(xs))
+	index = 1
+	for i in xs 
+	    Q = frrf(A,i)
+	    er[index] = opnorm((1.0I - Q*Q')*A)
+	    index += 1
+	end
+	p1 = plot(xs, er, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="pde2961\nFRRF\nl-error")
+	
+	er = zeros(size(xs))
+	index = 1
+	for i in xs 
+	    Q = rrf(A,i)
+	    er[index] = opnorm((1.0I - Q*Q')*A)
+	    index += 1
+	end
+	p2 = plot(xs, er, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="pde2961\nRRF\nl-error")
+	
+	plot!(p1,p2)
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.5_2.png}
+
+	\begin{lstlisting}
+	A = mmread("data/eris1176.mtx")
+	ra = 774
+	xs = collect(74:20:ra)
+	if xs[end] != ra
+	    xs = [xs ; ra]
+	end
+	er = zeros(size(xs))
+	index = 1
+	for i in xs 
+	    Q = frrf(A,i)
+	    er[index] = opnorm((1.0I - Q*Q')*A)
+	    index += 1
+	end
+	p1 = plot(xs, er, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="eris1176\nFRRF\nl-error")
+	
+	er = zeros(size(xs))
+	index = 1
+	for i in xs 
+	    Q = rrf(A,i)
+	    er[index] = opnorm((1.0I - Q*Q')*A)
+	    index += 1
+	end
+	p2 = plot(xs, er, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="eris1176\nRRF\nl-error")
+	
+	plot!(p1,p2)
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.5_3.png}
+
+	\begin{lstlisting}
+	A = mmread("data/lns__511.mtx")
+	ra = 391
+	xs = collect(41:10:ra)
+	if xs[end] != ra
+	    xs = [xs ; ra]
+	end
+	er = zeros(size(xs))
+	index = 1
+	for i in xs 
+	    Q = frrf(A,i)
+	    er[index] = opnorm((1.0I - Q*Q')*A)
+	    index += 1
+	end
+	p1 = plot(xs, er, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="lns__511\nFRRF\nl-error")
+	
+	er = zeros(size(xs))
+	index = 1
+	for i in xs 
+	    Q = rrf(A,i)
+	    er[index] = opnorm((1.0I - Q*Q')*A)
+	    index += 1
+	end
+	p2 = plot(xs, er, xaxis=("l-value"), yaxis="error", line = (0.5, 4, :blue), title="lns__511\nRRF\nl-error")
+	
+	plot!(p1,p2)
+	\end{lstlisting}
+	\includegraphics[scale=0.5]{images/4.5_4.png}
+
+	\section{Conclusion}
+		In this practice period...
 \end{document}
 
 
