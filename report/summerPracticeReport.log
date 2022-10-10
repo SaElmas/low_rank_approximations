@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2022.9.17)  9 OCT 2022 21:25
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2022.9.17)  10 OCT 2022 08:57
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -479,7 +479,7 @@ LaTeX Info: Redefining \nameref on input line 48.
 \@outlinefile=\write3
 \openout3 = `summerPracticeReport.out'.
 
-<images/left_logo.png, id=64, 488.82625pt x 407.5225pt>
+<images/left_logo.png, id=72, 488.82625pt x 407.5225pt>
 File: images/left_logo.png Graphic file (type png)
 <use images/left_logo.png>
 Package pdftex.def Info: images/left_logo.png  used on input line 51.
@@ -496,7 +496,7 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 52.
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-<images/right_logo.png, id=66, 398.48875pt x 396.48125pt>
+<images/right_logo.png, id=74, 398.48875pt x 396.48125pt>
 File: images/right_logo.png Graphic file (type png)
 <use images/right_logo.png>
 Package pdftex.def Info: images/right_logo.png  used on input line 59.
@@ -530,12 +530,12 @@ been already used, duplicate ignored
 l.90 	\newpage
                [1] [2] [3]
 LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 1
-89.
+73.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 ) [4]
-Overfull \hbox (4.71669pt too wide) in paragraph at lines 245--246
+Overfull \hbox (4.71669pt too wide) in paragraph at lines 229--230
 \T1/cmr/m/n/10.95 Matlab uses same com-mand for vec-tor and ma-trix norms: \T1/
 cmtt/m/n/10.95 norm(A,p) \T1/cmr/m/n/10.95 cal-cu-lates $\OML/cmm/m/it/10.95 p$
  \T1/cmr/m/n/10.95 norms, \T1/cmtt/m/n/10.95 norm(A,"fro")
@@ -545,110 +545,110 @@ cmtt/m/n/10.95 norm(A,p) \T1/cmr/m/n/10.95 cal-cu-lates $\OML/cmm/m/it/10.95 p$
 File: lstlang1.sty 2020/03/24 1.8d listings language file
 ) [5] [6]
 [7] [8] [9] [10] [11]
-<images/4.1_1.png, id=427, 633.36626pt x 411.5375pt>
+<images/4.1_1.png, id=447, 633.36626pt x 411.5375pt>
 File: images/4.1_1.png Graphic file (type png)
 <use images/4.1_1.png>
-Package pdftex.def Info: images/4.1_1.png  used on input line 617.
+Package pdftex.def Info: images/4.1_1.png  used on input line 601.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
-<images/4.1_2.png, id=428, 633.36626pt x 411.5375pt>
+<images/4.1_2.png, id=448, 633.36626pt x 411.5375pt>
 File: images/4.1_2.png Graphic file (type png)
 <use images/4.1_2.png>
-Package pdftex.def Info: images/4.1_2.png  used on input line 635.
+Package pdftex.def Info: images/4.1_2.png  used on input line 619.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
- [12 <./images/4.1_1.png>]
-<images/4.1_3.png, id=468, 633.36626pt x 411.5375pt>
+ [12 <./images/4.1_1.png> <./images/4.1_2.png>]
+<images/4.1_3.png, id=484, 633.36626pt x 411.5375pt>
 File: images/4.1_3.png Graphic file (type png)
 <use images/4.1_3.png>
-Package pdftex.def Info: images/4.1_3.png  used on input line 654.
+Package pdftex.def Info: images/4.1_3.png  used on input line 638.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
- [13 <./images/4.1_2.png> <./images/4.1_3.png>]
-<images/4.1_4.png, id=505, 633.36626pt x 411.5375pt>
+<images/4.1_4.png, id=485, 633.36626pt x 411.5375pt>
 File: images/4.1_4.png Graphic file (type png)
 <use images/4.1_4.png>
-Package pdftex.def Info: images/4.1_4.png  used on input line 671.
+Package pdftex.def Info: images/4.1_4.png  used on input line 655.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
-<images/4.2_1.png, id=506, 633.36626pt x 411.5375pt>
+ [13 <./images/4.1_3.png>]
+<images/4.2_1.png, id=519, 633.36626pt x 411.5375pt>
 File: images/4.2_1.png Graphic file (type png)
 <use images/4.2_1.png>
-Package pdftex.def Info: images/4.2_1.png  used on input line 682.
+Package pdftex.def Info: images/4.2_1.png  used on input line 666.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
- [14 <./images/4.1_4.png> <./images/4.2_1.png>]
-<images/4.2_2.png, id=532, 633.36626pt x 411.5375pt>
+<images/4.2_2.png, id=520, 633.36626pt x 411.5375pt>
 File: images/4.2_2.png Graphic file (type png)
 <use images/4.2_2.png>
-Package pdftex.def Info: images/4.2_2.png  used on input line 694.
+Package pdftex.def Info: images/4.2_2.png  used on input line 678.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
-<images/4.2_3.png, id=533, 633.36626pt x 411.5375pt>
+ [14 <./images/4.1_4.png> <./images/4.2_1.png>]
+<images/4.2_3.png, id=543, 633.36626pt x 411.5375pt>
 File: images/4.2_3.png Graphic file (type png)
 <use images/4.2_3.png>
-Package pdftex.def Info: images/4.2_3.png  used on input line 703.
+Package pdftex.def Info: images/4.2_3.png  used on input line 687.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
-<images/4.2_4.png, id=534, 633.36626pt x 411.5375pt>
+<images/4.2_4.png, id=544, 633.36626pt x 411.5375pt>
 File: images/4.2_4.png Graphic file (type png)
 <use images/4.2_4.png>
-Package pdftex.def Info: images/4.2_4.png  used on input line 712.
+Package pdftex.def Info: images/4.2_4.png  used on input line 696.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
  [15 <./images/4.2_2.png> <./images/4.2_3.png>]
-<images/4.3_1.png, id=557, 633.36626pt x 411.5375pt>
+<images/4.3_1.png, id=567, 633.36626pt x 411.5375pt>
 File: images/4.3_1.png Graphic file (type png)
 <use images/4.3_1.png>
-Package pdftex.def Info: images/4.3_1.png  used on input line 754.
+Package pdftex.def Info: images/4.3_1.png  used on input line 738.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
  [16 <./images/4.2_4.png>]
-<images/4.3_2.png, id=599, 633.36626pt x 411.5375pt>
+<images/4.3_2.png, id=609, 633.36626pt x 411.5375pt>
 File: images/4.3_2.png Graphic file (type png)
 <use images/4.3_2.png>
-Package pdftex.def Info: images/4.3_2.png  used on input line 791.
+Package pdftex.def Info: images/4.3_2.png  used on input line 775.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
  [17 <./images/4.3_1.png>]
-<images/4.3_3.png, id=640, 633.36626pt x 411.5375pt>
+<images/4.3_3.png, id=650, 633.36626pt x 411.5375pt>
 File: images/4.3_3.png Graphic file (type png)
 <use images/4.3_3.png>
-Package pdftex.def Info: images/4.3_3.png  used on input line 828.
+Package pdftex.def Info: images/4.3_3.png  used on input line 812.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
  [18 <./images/4.3_2.png>]
-<images/4.3_4.png, id=682, 633.36626pt x 411.5375pt>
+<images/4.3_4.png, id=692, 633.36626pt x 411.5375pt>
 File: images/4.3_4.png Graphic file (type png)
 <use images/4.3_4.png>
-Package pdftex.def Info: images/4.3_4.png  used on input line 865.
+Package pdftex.def Info: images/4.3_4.png  used on input line 849.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
  [19 <./images/4.3_3.png>]
-<images/4.5_1.png, id=725, 633.36626pt x 411.5375pt>
+<images/4.5_1.png, id=735, 633.36626pt x 411.5375pt>
 File: images/4.5_1.png Graphic file (type png)
 <use images/4.5_1.png>
-Package pdftex.def Info: images/4.5_1.png  used on input line 898.
+Package pdftex.def Info: images/4.5_1.png  used on input line 882.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
  [20 <./images/4.3_4.png>]
-<images/4.5_2.png, id=759, 633.36626pt x 411.5375pt>
+<images/4.5_2.png, id=769, 633.36626pt x 411.5375pt>
 File: images/4.5_2.png Graphic file (type png)
 <use images/4.5_2.png>
-Package pdftex.def Info: images/4.5_2.png  used on input line 928.
+Package pdftex.def Info: images/4.5_2.png  used on input line 912.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
  [21 <./images/4.5_1.png> <./images/4.5_2.png>]
-<images/4.5_3.png, id=794, 633.36626pt x 411.5375pt>
+<images/4.5_3.png, id=804, 633.36626pt x 411.5375pt>
 File: images/4.5_3.png Graphic file (type png)
 <use images/4.5_3.png>
-Package pdftex.def Info: images/4.5_3.png  used on input line 957.
+Package pdftex.def Info: images/4.5_3.png  used on input line 941.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
  [22 <./images/4.5_3.png>]
-<images/4.5_4.png, id=847, 633.36626pt x 411.5375pt>
+<images/4.5_4.png, id=857, 633.36626pt x 411.5375pt>
 File: images/4.5_4.png Graphic file (type png)
 <use images/4.5_4.png>
-Package pdftex.def Info: images/4.5_4.png  used on input line 986.
+Package pdftex.def Info: images/4.5_4.png  used on input line 970.
 (pdftex.def)             Requested size: 316.68236pt x 205.76825pt.
 
-[23 <./images/4.5_4.png>] (./summerPracticeReport.aux)
+[23 <./images/4.5_4.png>] [24] (./summerPracticeReport.aux)
 Package rerunfilecheck Info: File `summerPracticeReport.out' has not changed.
-(rerunfilecheck)             Checksum: A0A3060053B73C99EC245C9A84374BA0;2401.
+(rerunfilecheck)             Checksum: F956CFA2B8A1950143A1FEE64005B82E;2599.
  ) 
 Here is how much of TeX's memory you used:
- 14858 strings out of 478287
- 220907 string characters out of 5849289
- 1198679 words of memory out of 5000000
- 32195 multiletter control sequences out of 15000+600000
+ 14863 strings out of 478287
+ 220954 string characters out of 5849289
+ 1179462 words of memory out of 5000000
+ 32197 multiletter control sequences out of 15000+600000
  489980 words of font info for 80 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 60i,8n,63p,693b,1835s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 60i,8n,63p,697b,2438s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}{/usr/share/texmf/
 fonts/enc/dvips/cm-super/cm-super-ts1.enc}</usr/share/texlive/texmf-dist/fonts/
 type1/public/amsfonts/cmextra/cmbsy8.pfb></usr/share/texlive/texmf-dist/fonts/t
@@ -674,10 +674,10 @@ sr/share/texmf/fonts/type1/public/cm-super/sfrm0900.pfb></usr/share/texmf/fonts
 er/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1095.pfb></us
 r/share/texmf/fonts/type1/public/cm-super/sftt0900.pfb></usr/share/texmf/fonts/
 type1/public/cm-super/sftt1095.pfb>
-Output written on summerPracticeReport.pdf (24 pages, 924146 bytes).
+Output written on summerPracticeReport.pdf (25 pages, 930020 bytes).
 PDF statistics:
- 1110 PDF objects out of 1200 (max. 8388607)
- 983 compressed objects within 10 object streams
- 647 named destinations out of 1000 (max. 500000)
- 211 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1130 PDF objects out of 1200 (max. 8388607)
+ 1001 compressed objects within 11 object streams
+ 650 named destinations out of 1000 (max. 500000)
+ 227 words of extra memory for PDF output out of 10000 (max. 10000000)
 
